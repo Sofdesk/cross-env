@@ -25,7 +25,15 @@ function crossEnv(args, options = {}) {
     process.on('SIGINT', () => proc.kill('SIGINT'))
     process.on('SIGBREAK', () => proc.kill('SIGBREAK'))
     process.on('SIGHUP', () => proc.kill('SIGHUP'))
-    proc.on('exit', process.exit)
+    proc.on('exit', function(code, signal) {
+      // https://nodejs.org/api/child_process.html#child_process_event_exit
+      if (code === null && typeof signal === 'string') {
+        process.exit(1) // process terminated due to receipt of an error
+      }
+      else {
+        process.exit(code, signal)
+      }
+    })
     return proc
   }
   return null
